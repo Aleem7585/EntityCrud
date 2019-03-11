@@ -1,0 +1,69 @@
+public string UpdateAttachment(Nominee nom)
+        {
+            try
+            {
+                var obj = context.Nominees.FirstOrDefault(x => x.NomineeId == nom.NomineeId);
+                obj.AttachmentFile = nom.AttachmentFile;
+                obj.FrcFile = nom.FrcFile;
+                obj.ModifiedDate = DateTime.Now;
+                obj.ModifiedBy = (int)HttpContext.Session["UserId"];
+                context.Entry(obj).State = EntityState.Modified;
+                context.SaveChanges();
+                return "true";
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+        }
+
+
+public JsonResult GetAllNominees()
+        {
+            try
+            {
+                var lst = context.Nominees.Where(x => x.IsActive == true)
+             .Select(x => new
+             {
+                 x.NomineeId,
+                 x.MemberId,
+                 FullName = x.Member.FirstName + " " + x.Member.LastName,
+                 x.FirstName,
+                 x.LastName,
+                 x.RelationId,
+                 Relation = x.Relation.Relation1,
+                 x.Dob,
+                 x.CellNo,
+                 x.CNIC,
+                 x.Address,
+                 AttachmentFile = x.AttachmentFile == null ? "" : x.AttachmentFile,
+                 FrcFile = x.FrcFile == null ? "" : x.FrcFile
+
+             }).OrderBy(x => x.FullName).ToList();
+
+                return Json(lst, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception e)
+            {
+                return Json(e, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+public string CreateNewNominee(Nominee nom)
+        {
+            try
+            {
+                nom.IsActive = true;
+                nom.CreatedDate = DateTime.Now;
+                nom.CreatedBy = (int)HttpContext.Session["UserId"];
+                context.Nominees.Add(nom);
+                context.SaveChanges();
+
+                return "true";
+
+            }
+            catch (Exception e)
+            {
+                return e.ToString();
+            }
+        }
